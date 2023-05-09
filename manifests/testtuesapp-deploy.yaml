@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: testtuesapp
+  labels:
+    app: testtuesapp
+    version: 0.0.1
+    backstage.io/kubernetes-id: testtuesapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testtuesapp
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: testtuesapp
+        version: 0.0.1
+        backstage.io/kubernetes-id: testtuesapp
+      annotations:
+        sidecar.istio.io/proxyCPU: "100m"
+        sidecar.istio.io/proxyMemory: "128Mi"
+        sidecar.istio.io/proxyCPULimit: "200m"
+        sidecar.istio.io/proxyMemoryLimit: "128Mi"        
+    spec:
+      containers:
+      - name: testtuesapp
+        image: lab-registry.wwtlab.net/images/testtuesapp:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            port: 80
+            path: /
+        livenessProbe:
+          httpGet:
+            port: 80
+            path: /
+          initialDelaySeconds: 3
+          periodSeconds: 15
